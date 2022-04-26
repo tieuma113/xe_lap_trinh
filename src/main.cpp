@@ -18,15 +18,20 @@
 #define Ki      0
 #define Kd      0
 
-#define BASE_SPEED  200
+#define BASE_SPEED1  200
+#define BASE_SPEED2  178
 
 int error = 0,last_error = 0;
-int P = 0, I = 0, D = 0;
+int P = 50, I = 0, D = 0;
 
 
 int PID();
 int check();
 void run();
+void motor1Forward(int speed);
+void motor2Forward(int speed);
+void motor1Stop();
+void motor2Stop();
 
 void setup() {
   pinMode(sensor1, INPUT);
@@ -48,12 +53,41 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  //run();
-  analogWrite(en1, 255);
-  analogWrite(en2, 255);
+  run();
+  Serial.println(error);
+  // uint8_t sen1 = digitalRead(sensor1);
+  // uint8_t sen2 = digitalRead(sensor2);
+  // uint8_t sen3 = digitalRead(sensor3);
+  // uint8_t sen4 = digitalRead(sensor4);
+  // uint8_t sen5 = digitalRead(sensor5);
+  // Serial.println(sen1);
+  // Serial.println(sen2);
+  // Serial.println(sen3);
+  // Serial.println(sen4);
+  // Serial.println(sen5);
+  // Serial.println("===============");
+  // delay(1000);
+}
+
+void motor1Forward(int speed) {
+  analogWrite(en1, speed);
   digitalWrite(motor1f,HIGH);
   digitalWrite(motor1b,LOW);
+}
+
+void motor2Forward(int speed) {
+  analogWrite(en2, speed);
   digitalWrite(motor2f,HIGH);
+  digitalWrite(motor2b,LOW);
+}
+
+void motor1Stop(){
+  digitalWrite(motor1f,LOW);
+  digitalWrite(motor1b,LOW);
+}
+
+void motor2Stop(){
+  digitalWrite(motor2f,LOW);
   digitalWrite(motor2b,LOW);
 }
 
@@ -92,23 +126,18 @@ void run (){
   error = check();
   if (error!=3){
     int pid = PID();
-    int motor1Speed = BASE_SPEED + pid;
-    int motor2Speed = BASE_SPEED - pid;
-    if (motor1Speed >= 255)
-      motor1Speed = 255;
-    if (motor2Speed >= 255)
-      motor2Speed =255;
-    analogWrite(en1, motor1Speed);
-    analogWrite(en2, motor2Speed);
-    digitalWrite(motor1f,HIGH);
-    digitalWrite(motor1b,LOW);
-    digitalWrite(motor2f,HIGH);
-    digitalWrite(motor2b,LOW);
+    int motor1Speed = BASE_SPEED1 + pid;
+    int motor2Speed = BASE_SPEED2 - 0.9*pid;
+    if (motor1Speed >= BASE_SPEED1){
+      motor1Speed = BASE_SPEED1;
+    }
+    if (motor2Speed >= BASE_SPEED2){
+      motor2Speed =BASE_SPEED2;
+    }
+    motor1Forward(motor1Speed);
+    motor2Forward(motor2Speed);
   }else{
-    digitalWrite(motor1f,LOW);
-    digitalWrite(motor1b,LOW);
-    digitalWrite(motor2f,LOW);
-    digitalWrite(motor2b,LOW);
+    motor1Stop();
+    motor2Stop();
   }
-
 }
