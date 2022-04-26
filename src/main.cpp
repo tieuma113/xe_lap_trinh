@@ -14,12 +14,12 @@
 #define en2     9
 #define en1     10
 
-#define Kp      50
+#define Kp      40
 #define Ki      0
-#define Kd      0
+#define Kd      10
 
-#define BASE_SPEED1  200
-#define BASE_SPEED2  178
+#define BASE_SPEED1  100
+#define BASE_SPEED2  100
 
 int error = 0,last_error = 0;
 int P = 50, I = 0, D = 0;
@@ -54,7 +54,7 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   run();
-  Serial.println(error);
+  //Serial.println(error);
   // uint8_t sen1 = digitalRead(sensor1);
   // uint8_t sen2 = digitalRead(sensor2);
   // uint8_t sen3 = digitalRead(sensor3);
@@ -67,6 +67,8 @@ void loop() {
   // Serial.println(sen5);
   // Serial.println("===============");
   // delay(1000);
+  // motor1Forward(BASE_SPEED1);
+  // motor2Forward(BASE_SPEED2);
 }
 
 void motor1Forward(int speed) {
@@ -117,7 +119,7 @@ int check() {
     er = 1;
   else if ((sen1 == 1 && sen2 == 1 && sen3 == 1 && sen4 == 1 && sen5 == 0) || (sen1 == 1 && sen2 == 1 && sen3 == 1 && sen4 == 0 && sen5 == 0))  
     er = 2;
-  else if ((sen1 == 1 && sen2 == 1 && sen3 == 1 && sen4 == 1 && sen5 == 1) || (sen1 == 0 && sen2 == 0 && sen3 == 0 && sen4 == 0 && sen5 == 0))
+  else if ( (sen1 == 0 && sen2 == 0 && sen3 == 0 && sen4 == 0 && sen5 == 0))
     er = 3;
   return er;
 }
