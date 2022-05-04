@@ -12,14 +12,14 @@
 #define motor2f 5
 
 #define en2     9
-#define en1     10
+#define en1     11
 
-#define Kp      40
+#define Kp      100
 #define Ki      0
-#define Kd      10
+#define Kd      2                                                                                                                                                                                     
 
-#define BASE_SPEED1  100
-#define BASE_SPEED2  100
+#define BASE_SPEED1  80
+#define BASE_SPEED2  80
 
 int error = 0,last_error = 0;
 int P = 50, I = 0, D = 0;
@@ -109,24 +109,24 @@ int check() {
   uint8_t sen4 = digitalRead(sensor4);
   uint8_t sen5 = digitalRead(sensor5);
   int er = 0;
-  if ((sen1 == 0 && sen2 == 1 && sen3 == 1 && sen4 == 1 && sen5 == 1) || (sen1 == 0 && sen2 == 0 && sen3 == 1 && sen4 == 1 && sen5 == 1))
-    er = -2;
-  else if ((sen1 == 1 && sen2 == 0 && sen3 == 1 && sen4 == 1 && sen5 == 1) || (sen1 == 1 && sen2 == 0 && sen3 == 0 && sen4 == 1 && sen5 == 1))
-    er = -1;
-  else if ((sen1 == 1 && sen2 == 1 && sen3 == 0 && sen4 == 1 && sen5 == 1) || (sen1 == 1 && sen2 == 0 && sen3 == 0 && sen4 == 0 && sen5 == 1))
-    er = 0;
-  else if ((sen1 == 1 && sen2 == 1 && sen3 == 1 && sen4 == 0 && sen5 == 1) || (sen1 == 1 && sen2 == 1 && sen3 == 0 && sen4 == 0 && sen5 == 1))
-    er = 1;
-  else if ((sen1 == 1 && sen2 == 1 && sen3 == 1 && sen4 == 1 && sen5 == 0) || (sen1 == 1 && sen2 == 1 && sen3 == 1 && sen4 == 0 && sen5 == 0))  
-    er = 2;
-  else if ( (sen1 == 0 && sen2 == 0 && sen3 == 0 && sen4 == 0 && sen5 == 0))
-    er = 3;
+  if (sen1 == 0)
+    er += -2;
+  if (sen2 == 0)
+    er += -1;
+  if (sen3 == 0)
+    er += 0;
+  if (sen4 == 0)
+    er += 1;
+  if (sen5 == 0)  
+    er += 2;
+  // else if ( (sen1 == 0 && sen2 == 0 && sen3 == 0 && sen4 == 0 && sen5 == 0))
+  //   er = 3;
   return er;
 }
 
 void run (){
   error = check();
-  if (error!=3){
+  // if (error!=3){
     int pid = PID();
     int motor1Speed = BASE_SPEED1 + pid;
     int motor2Speed = BASE_SPEED2 - 0.9*pid;
@@ -138,8 +138,8 @@ void run (){
     }
     motor1Forward(motor1Speed);
     motor2Forward(motor2Speed);
-  }else{
-    motor1Stop();
-    motor2Stop();
-  }
+  // }else{
+  //   motor1Stop();
+  //   motor2Stop();
+  // }
 }
