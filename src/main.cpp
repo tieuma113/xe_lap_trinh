@@ -14,12 +14,12 @@
 #define en2     9
 #define en1     11
 
-#define Kp      40
+#define Kp      20
 #define Ki      0
-#define Kd      20
+#define Kd      5
 
-#define BASE_SPEED1  90
-#define BASE_SPEED2  90
+#define BASE_SPEED  85
+#define BALANCE     0.87
 
 int error = 0,last_error = 0;
 int P = 50, I = 0, D = 0;
@@ -56,16 +56,16 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   run();
-  Serial.println(mode);
+  // Serial.println(mode);
   //Serial.println(error);
-  //motor2Forward(150);
-  //motor1Forward(150);
+  // motor2Forward(100);
+  // motor1Forward(0.87*100);
   // uint8_t sen1 = digitalRead(sensor1);
   // uint8_t sen2 = digitalRead(sensor2);
   // uint8_t sen3 = digitalRead(sensor3);
   // uint8_t sen4 = digitalRead(sensor4);
   // uint8_t sen5 = digitalRead(sensor5);
-  // Serial.println(sen1);
+  //  Serial.println(sen1);
   // Serial.println(sen2);
   // Serial.println(sen3);
   // Serial.println(sen4);
@@ -99,21 +99,19 @@ void motor2Stop(){
 }
 
 void rotateLeft(){
-  analogWrite(en1, 100);
-  digitalWrite(motor1f,HIGH);
+  analogWrite(en2, 75);
+  digitalWrite(motor2f,HIGH);
+  digitalWrite(motor2b,LOW);
+  digitalWrite(motor1f,LOW);
   digitalWrite(motor1b,LOW);
-  analogWrite(en2, 30);
-  digitalWrite(motor2f,LOW);
-  digitalWrite(motor2b,HIGH);
 }
 
 void rotateRight(){
-  analogWrite(en2, 100);
-  digitalWrite(motor2f,HIGH);
+  analogWrite(en1, 75);
+  digitalWrite(motor1f,HIGH);
+  digitalWrite(motor1b,LOW);
+  digitalWrite(motor2f,LOW);
   digitalWrite(motor2b,LOW);
-  analogWrite(en1,30);
-  digitalWrite(motor1f,LOW);
-  digitalWrite(motor1b,HIGH);
 }
 
 int sen3Change(){
@@ -169,22 +167,22 @@ void run (){
   error = check();
   if (mode == 0){
     int pid = PID();
-    int motor1Speed = BASE_SPEED1 + 0.9*pid;
-    int motor2Speed = BASE_SPEED2 - pid;
-    if (motor1Speed >= BASE_SPEED1){
-      motor1Speed = BASE_SPEED1;
+    int motor1Speed = BASE_SPEED * BALANCE + pid;
+    int motor2Speed = BASE_SPEED - BALANCE * pid;
+    if (motor1Speed >= 255){
+      motor1Speed = 255;
     }
-    if (motor2Speed >= BASE_SPEED2){
-      motor2Speed =BASE_SPEED2;
+    if (motor2Speed >= 255){
+      motor2Speed = 255;
     }
     motor1Forward(motor1Speed);
     motor2Forward(motor2Speed);
   }else if (mode == 1){
-    rotateLeft();
+    rotateRight();
     if(sen3Change())
       mode = 0;
   }else if (mode == 2){
-    rotateRight();
+    rotateLeft();
     if (sen3Change())
       mode = 0;
   }
