@@ -1,10 +1,10 @@
 #include <Arduino.h>
 
-#define sensor1 A0
+#define sensor1 A4
 #define sensor2 A1
 #define sensor3 A2
 #define sensor4 A3
-#define sensor5 A4
+#define sensor5 A0
 
 #define motor1b 2
 #define motor1f 3
@@ -14,16 +14,17 @@
 #define en2     9
 #define en1     11
 
-#define Kp      100
+#define Kp      40
 #define Ki      0
-#define Kd      2                                                                                                                                                                                     
+#define Kd      20
 
-#define BASE_SPEED1  80
-#define BASE_SPEED2  80
+#define BASE_SPEED1  90
+#define BASE_SPEED2  90
 
 int error = 0,last_error = 0;
 int P = 50, I = 0, D = 0;
-
+int mode = 0;
+uint8_t lastState = 0;
 
 int PID();
 int check();
@@ -49,12 +50,16 @@ void setup() {
   pinMode(en1, OUTPUT);
 
   Serial.begin(9600);
+  lastState = digitalRead(sensor3);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   run();
+  Serial.println(mode);
   //Serial.println(error);
+  //motor2Forward(150);
+  //motor1Forward(150);
   // uint8_t sen1 = digitalRead(sensor1);
   // uint8_t sen2 = digitalRead(sensor2);
   // uint8_t sen3 = digitalRead(sensor3);
@@ -93,6 +98,35 @@ void motor2Stop(){
   digitalWrite(motor2b,LOW);
 }
 
+void rotateLeft(){
+  analogWrite(en1, 100);
+  digitalWrite(motor1f,HIGH);
+  digitalWrite(motor1b,LOW);
+  analogWrite(en2, 30);
+  digitalWrite(motor2f,LOW);
+  digitalWrite(motor2b,HIGH);
+}
+
+void rotateRight(){
+  analogWrite(en2, 100);
+  digitalWrite(motor2f,HIGH);
+  digitalWrite(motor2b,LOW);
+  analogWrite(en1,30);
+  digitalWrite(motor1f,LOW);
+  digitalWrite(motor1b,HIGH);
+}
+
+int sen3Change(){
+  uint8_t sen3 = digitalRead(sensor3);
+  int countC = 0;
+  if (sen3 != lastState){
+    if (sen3 == 0)
+      countC = 1;
+  }
+  lastState = sen3;
+  return countC;
+}
+
 int PID(){
   P = error;
   I += error;
@@ -109,27 +143,34 @@ int check() {
   uint8_t sen4 = digitalRead(sensor4);
   uint8_t sen5 = digitalRead(sensor5);
   int er = 0;
-  if (sen1 == 0)
-    er += -2;
+  // if ((sen1 == 0 && sen2 == 1 && sen3 == 1 && sen4 == 1 && sen5 == 1) || (sen1 == 0 && sen2 == 0 && sen3 == 1 && sen4 == 1 && sen5 == 1))
+  //   er = -3;
   if (sen2 == 0)
     er += -1;
   if (sen3 == 0)
     er += 0;
   if (sen4 == 0)
-    er += 1;
-  if (sen5 == 0)  
-    er += 2;
-  // else if ( (sen1 == 0 && sen2 == 0 && sen3 == 0 && sen4 == 0 && sen5 == 0))
+    er = 1;
+  // else if ((sen1 == 1 && sen2 == 1 && sen3 == 1 && sen4 == 1 && sen5 == 0) || (sen1 == 1 && sen2 == 1 && sen3 == 1 && sen4 == 0 && sen5 == 0))  
   //   er = 3;
+  // else if ( (sen1 == 0 && sen2 == 0 && sen3 == 0 && sen4 == 0 && sen5 == 0))
+  //   er = 4;
+  if (sen1 == 0 && mode == 0)
+    mode  = 1;
+  if (sen5 == 0 && mode == 0)
+    mode = 2;
+  // if (sen1 == 0 && sen5 == 0)
+  //   mode = 0;
+
   return er;
 }
 
 void run (){
   error = check();
-  // if (error!=3){
+  if (mode == 0){
     int pid = PID();
-    int motor1Speed = BASE_SPEED1 + pid;
-    int motor2Speed = BASE_SPEED2 - 0.9*pid;
+    int motor1Speed = BASE_SPEED1 + 0.9*pid;
+    int motor2Speed = BASE_SPEED2 - pid;
     if (motor1Speed >= BASE_SPEED1){
       motor1Speed = BASE_SPEED1;
     }
@@ -138,8 +179,13 @@ void run (){
     }
     motor1Forward(motor1Speed);
     motor2Forward(motor2Speed);
-  // }else{
-  //   motor1Stop();
-  //   motor2Stop();
-  // }
+  }else if (mode == 1){
+    rotateLeft();
+    if(sen3Change())
+      mode = 0;
+  }else if (mode == 2){
+    rotateRight();
+    if (sen3Change())
+      mode = 0;
+  }
 }
