@@ -24,7 +24,11 @@
 int error = 0,last_error = 0;
 int P = 50, I = 0, D = 0;
 int mode = 0;
-uint8_t lastState = 0;
+uint8_t lastState3 = 0;
+uint8_t lastState1 = 0;
+uint8_t lastState5 = 0;
+uint8_t countLeft = 0;
+uint8_t countRight = 0;
 
 int PID();
 int check();
@@ -33,6 +37,12 @@ void motor1Forward(int speed);
 void motor2Forward(int speed);
 void motor1Stop();
 void motor2Stop();
+void rotateLeft();
+void rotateRight();
+int sen3Change();
+int sen1Change();
+int sen5Change();
+
 
 void setup() {
   pinMode(sensor1, INPUT);
@@ -50,7 +60,7 @@ void setup() {
   pinMode(en1, OUTPUT);
 
   Serial.begin(9600);
-  lastState = digitalRead(sensor3);
+  lastState3 = digitalRead(sensor3);
 }
 
 void loop() {
@@ -117,11 +127,33 @@ void rotateRight(){
 int sen3Change(){
   uint8_t sen3 = digitalRead(sensor3);
   int countC = 0;
-  if (sen3 != lastState){
+  if (sen3 != lastState3){
     if (sen3 == 0)
       countC = 1;
   }
-  lastState = sen3;
+  lastState3 = sen3;
+  return countC;
+}
+
+int sen1Change(){
+  uint8_t sen1 = digitalRead(sensor1);
+  int countC = 0;
+  if (sen1 != lastState1){
+    if (sen1 == 0)
+      countC = 1;
+  }
+  lastState1 = sen1;
+  return countC;
+}
+
+int sen5Change(){
+  uint8_t sen5 = digitalRead(sensor5);
+  int countC = 0;
+  if (sen5 != lastState5){
+    if (sen5 == 0)
+      countC = 1;
+  }
+  lastState5 = sen5;
   return countC;
 }
 
@@ -135,11 +167,11 @@ int PID(){
 }
 
 int check() {
-  uint8_t sen1 = digitalRead(sensor1);
+  //uint8_t sen1 = digitalRead(sensor1);
   uint8_t sen2 = digitalRead(sensor2);
   uint8_t sen3 = digitalRead(sensor3);
   uint8_t sen4 = digitalRead(sensor4);
-  uint8_t sen5 = digitalRead(sensor5);
+  //uint8_t sen5 = digitalRead(sensor5);
   int er = 0;
   // if ((sen1 == 0 && sen2 == 1 && sen3 == 1 && sen4 == 1 && sen5 == 1) || (sen1 == 0 && sen2 == 0 && sen3 == 1 && sen4 == 1 && sen5 == 1))
   //   er = -3;
@@ -153,10 +185,20 @@ int check() {
   //   er = 3;
   // else if ( (sen1 == 0 && sen2 == 0 && sen3 == 0 && sen4 == 0 && sen5 == 0))
   //   er = 4;
-  if (sen1 == 0 && mode == 0)
-    mode  = 1;
-  if (sen5 == 0 && mode == 0)
-    mode = 2;
+  if (sen1Change() && mode == 0){
+    countRight++;
+    if (countRight == 2){
+      mode = 1;
+      countRight = 0;
+    }
+  }
+  if (sen5Change() && mode == 0){ 
+    countLeft++;
+    if (countLeft == 2){
+      mode = 2;
+      countLeft = 0;
+      }
+    }
   // if (sen1 == 0 && sen5 == 0)
   //   mode = 0;
 
