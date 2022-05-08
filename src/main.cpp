@@ -14,11 +14,11 @@
 #define en2     9
 #define en1     11
 
-#define Kp      20
+#define Kp      15
 #define Ki      0
 #define Kd      5
 
-#define BASE_SPEED  85
+#define BASE_SPEED  81
 #define BALANCE     0.87
 
 int error = 0,last_error = 0;
@@ -109,7 +109,7 @@ void motor2Stop(){
 }
 
 void rotateLeft(){
-  analogWrite(en2, 75);
+  analogWrite(en2, 76);
   digitalWrite(motor2f,HIGH);
   digitalWrite(motor2b,LOW);
   digitalWrite(motor1f,LOW);
@@ -117,7 +117,7 @@ void rotateLeft(){
 }
 
 void rotateRight(){
-  analogWrite(en1, 75);
+  analogWrite(en1, 77 * BALANCE);
   digitalWrite(motor1f,HIGH);
   digitalWrite(motor1b,LOW);
   digitalWrite(motor2f,LOW);
@@ -185,18 +185,18 @@ int check() {
   //   er = 3;
   // else if ( (sen1 == 0 && sen2 == 0 && sen3 == 0 && sen4 == 0 && sen5 == 0))
   //   er = 4;
-  if (sen1Change() && mode == 0){
+  if (sen1Change() && (mode == 0 )){
     countRight++;
-    if (countRight == 2){
+    if (countRight == 2|| countRight==5 || countRight==6|| countRight==7|| countRight==8 || countRight==9 || countRight==10 || countRight==12 || countRight==13 || countRight==14){
       mode = 1;
-      countRight = 0;
+      //countRight = 0;
     }
   }
   if (sen5Change() && mode == 0){ 
     countLeft++;
-    if (countLeft == 2){
+    if (1){
       mode = 2;
-      countLeft = 0;
+      //countLeft = 0;
       }
     }
   // if (sen1 == 0 && sen5 == 0)
